@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/CMakeFiles/bootloader
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/CMakeFiles/bootloader.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/CMakeFiles/bootloader-complete.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

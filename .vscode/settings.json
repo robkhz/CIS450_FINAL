@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "esp-bsp.h": "c",
+    "iot_button.h": "c"
+  }
+}

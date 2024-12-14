@@ -1,0 +1,2 @@
+source /Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/gdbinit/symbols
+source /Users/robertkhzouz/Downloads/esp-dev-kits-master/esp32-c3-lcdkit/examples/knob_panel/build/gdbinit/connect
