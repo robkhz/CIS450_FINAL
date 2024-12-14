@@ -1,0 +1,65 @@
+https://docs.google.com/document/d/1OwQpsQf58ACN6Q435w40R9Bm13a3TBc8fbqg81-vV5M/edit?usp=sharing
+
+
+CIS 450 Final Project
+Robert Khzouz
+Hikaru Nakamura
+Sadik Rahman
+
+
+Table of Content
+
+
+Project Scope:	3
+System Architecture:	3
+Concurrency Control Explanation:	5
+User Guide:	5
+Video Demonstration of Product:	6
+Code Repository:	6
+References:	6
+
+Project Scope: 
+The scope of this project includes enhancing the functionality of the already existing “Lighting” feature within the Knob Panel. We plan on implementing a voice announcement feature. It announces the current lighting level each time the knob is rotated to adjust the brightness. This provides auditory feedback to users and enhances accessibility for individuals with visual impairments, ensuring a more inclusive user experience. The system uses FreeRTOS to handle multitasking and allows the tasks to run without interruptions or delays. Synchronization mechanisms such as mutexes protect shared resources and coordinate task execution. For example, while the lighting control task updates the brightness level, the voice announcement task retrieves and announces the change without disrupting user input. This ensures a smooth transition between tasks and prevents conflicts when the brightness variable. The project could also include a bonus feature, independent from the main purpose. This additional functionality whether it be color temperature control or motion sensors could highlight the various functionalities that can be implemented if one wanted to. The system is built using the ESP32-C3-LCDKit hardware, including its LCD display, knob panel, LEDS, and audio output components. The project focuses on voice feedback and multitasking using threading within the ESP32-C3-LCDKit environment. 
+
+System Architecture: 
+The system architecture starts in the ui_light_2color.c file, which outlines the UI interface of the device when the light screen is selected. Upon selection, a FreeRTOS-based task is created via xTaskCreate. This task establishes whatever task is passed into the arguments to operate on its own thread. If there are multiple threads, xTaskCreate will determine priority and assess as needed. Additionally, a binary semaphore and mutex are created via xSemaphoreCreateBinary. The semaphore's value is set to one to ensure that each time the lighting is changed, the semaphore prevents any access to the lighting variable. The mutex additionally creates a lock on the voice announcement, preventing rapid changes to the lighting variable from repeatedly overriding the voice announcement. Once the user navigated off the lighting UI via a long press of the knob panel, the semaphore and mutex were deleted, and control was sent back to the main functionality of the program.
+
+The tasks were grouped via xEventGroupCreate. These event groups were used to synchronize the execution of tasks and enable communication between tasks. Specifically, event flags were set and waited on using xEventGroupSetBits and xEventGroupWaitBits, ensuring tasks such as voice announcements and lighting updates were executed in a coordinated manner. For example, the voice announcement task would wait for a signal indicating that the lighting variable had been updated, and only then would it retrieve the updated light level and announce it.
+
+Additionally, sound files (SPIFFS) were added to reflect the current light level. Because the SPIFFS folder has a limited buffer size for storage, other audio files had to be removed to make additional room. These files were also referenced appropriately in app_audio.h, being referenced via constant variables in the enum instance PDM_SOUND_TYPE. A simple function, get_sound_by_light_level, was created to map the light level to the corresponding sound. The audio_handle_info function was called when the lighting was changed, which took in the sound via an argument and announced it. Before the announcement, however, the change of the lighting decremented the semaphore to allow the lighting thread to access the lighting resource. Once the semaphore was decremented, all other threads moving forward were blocked until the semaphore was incremented, indicating the shared resource could be accessed. The mutex lock was also unlocked, allowing the task to manipulate the value of the lighting. Once the lighting variable was manipulated, the audio was played.
+
+Lastly, I wanted to discuss why we chose our approach, what it does well and why, what it fails/lacks, and steps for improvement. Firstly, we chose our approach because the final project specification directly stated the use of semaphores and mutexes for concurrency mechanisms. Initially, we wanted to use the standard universal C library for mutexes and semaphores; however, the project specification additionally stated that FreeRTOS should be used for universal thread/concurrency mechanisms across varying operating systems. FreeRTOS had, quite surprisingly, great documentation for each function. After spending time studying the documentation for the functions we felt were best suited for our project, we concluded that xTaskCreate, xSemaphoreCreateBinary, and the deletion functions were the best choices.
+
+The reason we did not choose to use any of the queuing functions was that, while appealing, they did not add any additional functionality that xTaskCreate did not already provide. For example, any tasks could be added to the queue and run when needed based on priority. However, the documentation of xTaskCreate clearly states that it has a built-in queuing system for all tasks, stating it "add[s] it to the list of tasks that are ready to run." This became apparent when the lighting voice announcement was overriding the running voice announcement, proving that xTaskCreate's list and xQueueCreate's queue were both similar in nature.
+
+Our approach, while functional, did not appropriately queue the voice announcement correctly. A semaphore value of 1 causes the voice announcements to wait, which is expected. However, whichever task reaches the semaphore next is entirely dependent on the underlying logic implemented by the operating system itself. This has the possibility of causing the operating system to starve one of the voice announcements if the knob panel is spun unreasonably quickly. The steps to improve this would be to actually backtrack on our stance on using xQueueCreate, whereby we could combine the tasks and queue logic to appropriately queue voice announcements in the correct order. This can be done by assigning a timestamp of sorts to each voice announcement and setting up the queue in a priority-queue-like fashion, only taking whatever has the highest priority—or, in other words, taking the earliest voice announcement in the queue
+
+Concurrency Control Explanation: 
+Mutexes and semaphores are synchronization mechanisms used to control access to shared resources. However, they each focus on different parts to ensure smooth coexistence. Mutexes are made to protect the shared lighting level variable, ensuring that only one task can access or modify it at a time and preventing race conditions. Semaphores are used to manage task signaling which ensures tasks execute in proper sequence without causing delays. Additionally, event groups synchronize tasks smoothly. For instance, xEventGroupSetBits signals the Voice Announcement Task whenever the Lighting Control Task updates the brightness level. The Voice Announcement Task then uses xEventGroupWaitBits to wait for this signal. These integrations of concurrency mechanisms guarantee multitasking and efficient resource sharing.
+
+ For this system specifically, the system employs two primary concurrency control mechanisms to manage shared resources between the lighting control and voice announcement tasks. The first is xSemaphoreCreateBinary with an initial value of 1. This acts as a gatekeeper for the lighting variable access. When the light change is requested. The semaphore decreases to 0 and all other threads are blocked. This gives access to the lighting variables. Once the semaphore gets incremented it then unblocks all threads. The second is mutex protection. This is specifically for the voice announcements. It blocks rapid lighting changes that could result in announcements from colliding. During a voice announcement, the mutex is locked, preventing new lighting changes from triggering additional announcements. Once the announcement completes, the mutex is unlocked. This prevents voice announcements from overlapping or being interrupted. These two mechanisms ensure for proper execution of the voice announcements and safe access to lighting variables.  
+
+User Guide: 
+This guide explains how to operate the ESP32-C3-LCDKit lighting feature, which provides a flashlight that can brighten your surroundings for better vision. The lighting feature has two lighting temperatures (Cool or Warm) and four brightness settings. 
+
+To access the lighting feature of the ESP32-C3-LCDKit plug in the device to a laptop or PC using a USB to Type C cable. Wait for the device to boot up and display the menu screen. The menu screen should show the three different modes you can choose from (Washing, Temperature, Lighting). 
+
+Using the knob of the device, turn it towards the direction of the lighting mode. Once you are on the lighting mode icon press on the knob to enter light mode. Once on the light mode, the light should turn on. 
+
+To change the temperature of the light, press on the knob of the device. The light color should change. To change it back, press on the knob again. 
+
+To change the brightness of the light, turn the knob to the brightness level you want. If you want the light to be dimmer, turn the knob to the left. If you want the light to be brighter turn the knob to the right. 
+
+To exit out of the lighting mode press and hold the knob button for five seconds. You should be directed back to the menu screen from start-up. 
+
+Video Demonstration of Product:
+https://www.youtube.com/shorts/g5VnbzQFW0g
+
+
+Code Repository:
+https://github.com/robkhz/CIS450_FINAL
+
+
+References:
+“ESP32-C3-LCDkit.” Esp, docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c3/esp32-c3-lcdkit/user_guide.html. Accessed 13 Dec. 2024. 
+Preet. YouTube, YouTube, www.youtube.com/watch?v=31g6_uJ4kdE. Accessed 13 Dec. 2024. 
